@@ -1,0 +1,35 @@
+# depslib dependency file v1.0
+1439452692 source:e:\c++wk\newvoice\cwavread.cpp
+	"CWavread.h"
+
+1439515652 e:\c++wk\newvoice\cwavread.h
+	<iostream>
+	<fstream>
+	<string.h>
+	<math.h>
+	<cmath>
+	<stdlib.h>
+	<bitset>
+	<iomanip>
+
+1440469002 source:e:\c++wk\newvoice\detection.cpp
+	"detection.h"
+	<memory>
+	<iostream>
+	<string.h>
+
+1440399487 e:\c++wk\newvoice\detection.h
+
+1440495493 source:e:\c++wk\newvoice\main.cpp
+	<iostream>
+	<vector>
+	"detection.h"
+	"voicedetection.h"
+	"CWavread.h"
+	<fstream>
+	<map>
+
+1440494958 e:\c++wk\newvoice\voicedetection.h
+	<map>
+	<vector>
+

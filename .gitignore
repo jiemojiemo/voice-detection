@@ -1,0 +1,13 @@
+*.raw
+*.obj
+*.tlog
+*.rc
+*.manifest
+*.res
+*.log
+*.rc
+*.idb
+*.pdb
+*.lastbuildstate
+*.ipch
+*.opensdf
