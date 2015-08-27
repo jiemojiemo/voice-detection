@@ -6,6 +6,9 @@ using std::map;
 using std::vector;
 using std::pair;
 
+#define MIN_VOICE_FREQUENCY 80.0
+#define MAX_VOICE_FREQUENCY 1000.0
+
 struct SpeechSegment{
 	int frequence;
 	unsigned int start;
@@ -31,13 +34,15 @@ private:
     double GetAmplitudesMin(  );
 	void EnFrame( const float* dataIn, int sampleSize, int winSize, int hop );
     void StartEndPointDetection();
-	vector<SpeechSegment> FindSpeechSegment();
+	vector<SpeechSegment> FindSpeechSegment( const float* buffer, int sampleRate );
+	vector<float> AMDFCalc( const vector<float>& amdfData );
+	int VoiceFrequenceCalc( const vector<float>& amdfResult, int sampleRate );
 
 
 public:
     CVoiceDetection();
 	~CVoiceDetection();
-    vector<SpeechSegment> Detection( const float* buffer, int sampleCount );
+    vector<SpeechSegment> Detection( const float* buffer, int sampleCount, int sampleRate );
 
 public:
     vector<int> m_zeroCrossRate;

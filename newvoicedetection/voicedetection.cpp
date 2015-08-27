@@ -1,4 +1,5 @@
 #include "voicedetection.h"
+#include <assert.h>
 
 #define MAX(x,y) ( (x)>(y)?(x):(y) )
 #define MIN(x,y) ( (x)<(y)?(x):(y) )
@@ -34,7 +35,7 @@ CVoiceDetection::~CVoiceDetection()
 				delete [] m_frameData[i];
 		}
 }
-vector<SpeechSegment> CVoiceDetection::Detection( const float* buffer, int sampleCount )
+vector<SpeechSegment> CVoiceDetection::Detection( const float* buffer, int sampleCount,int sampleRate )
 {
     //map<int, int> startEndMap;
     EnFrame( buffer, sampleCount, m_winSize, m_hop );
@@ -42,7 +43,7 @@ vector<SpeechSegment> CVoiceDetection::Detection( const float* buffer, int sampl
     CalcAmplitude();
 	CalcAmpThreshold();
     StartEndPointDetection();
-	return FindSpeechSegment();
+	return FindSpeechSegment( buffer,sampleRate );
 }
 void CVoiceDetection::EnFrame( const float* dataIn, int sampleSize, int winSize, int hop )
 {
@@ -192,24 +193,81 @@ bool CVoiceDetection::IsMaybeVoice( double amp, int zcr )
 	return amp > m_ampMinThreshold || zcr < m_zcMaxThreshold;
 }
 
-vector<SpeechSegment> CVoiceDetection::FindSpeechSegment()
+vector<SpeechSegment> CVoiceDetection::FindSpeechSegment( const float* buffer, int sampleRate )
 {
+	assert( buffer != NULL);
+	assert( sampleRate != 0 );
+	//我们通过amdfSize大小的区域来检查人声频率
+	//我们确保amdfSize内至少含有人声两个周期
+	int amdfSize = sampleRate / MIN_VOICE_FREQUENCY * 2;
 	for( auto it = m_startEndMap.begin(); it != m_startEndMap.end(); ++it )
 	{
+		//获取人声区域的中间点，确保这个点是人声
 		int middleFrameIndex = (it->first + it->second)/2;
-		int middleSample = middleFrameIndex * detection.m_hop;
+		int middleSampleIndex = middleFrameIndex * m_hop;
 
-		vector<float> amdfData( buffer+middleSample, buffer+middleSample+amdfSize );
-		auto amdfResult = AMDFCalc( amdfData );
+		vector<float> dataForAMDF( buffer+middleSampleIndex, buffer+middleSampleIndex+amdfSize );
+		//计算平均幅度差
+		auto amdfResult = AMDFCalc( dataForAMDF );
+		//计算人声频率
 		auto voiceFrequence = VoiceFrequenceCalc( amdfResult, sampleRate );
 		if( 0 != voiceFrequence )
 		{
 			SpeechSegment smg(voiceFrequence, it->first, it->second);
-			speechSegment.push_back( smg );
+			m_speechSegment.push_back( smg );
 		}
-
-		cout << voiceFrequence << endl;
 	}
+	return m_speechSegment;
+}
+
+////计算平均幅度差
+vector<float> CVoiceDetection::AMDFCalc( const vector<float>& amdfData )
+{
+	vector<float> amdfResult;
+	double maxamdfResult = 0.0;
+	for( int i = 0;  i < amdfData.size(); ++i )
+	{
+		int k=0;
+		double sum = 0;
+		for( int j = i; j < amdfData.size(); ++j)
+		{
+			sum += fabs( amdfData[j] - amdfData[k++] );
+		}
+		amdfResult.push_back( sum );
+		//找最大的自相关值
+		if( maxamdfResult < sum )
+			maxamdfResult = sum;
+	}
+	//将最大值存放到末尾
+	amdfResult.push_back( maxamdfResult );
+	return amdfResult;
+}
+
+//
+int CVoiceDetection::VoiceFrequenceCalc( const vector<float>& amdfResult, int sampleRate )
+{
+	//获取最大平均幅度差
+	double maxamdfResult = amdfResult.back();
+	int index = 0;
+	
+	for( int i = 1; i < amdfResult.size() - 1; ++i )
+	{
+		//是极小值
+		if( amdfResult[i] < amdfResult[i-1] && amdfResult[i]<amdfResult[i+1] )	
+			//是真正的谷底，这里采用的方法比较low，应该还有更好的判定方法
+			if( amdfResult[i] < maxamdfResult/3.0)								
+				//人声频率范围 [1000,80]，这个条件过滤那些被误取的噪音	
+				//    F = 1/T
+				//    T = i / sampleRate
+				if( (sampleRate / i) < MAX_VOICE_FREQUENCY && (sampleRate / i) > MIN_VOICE_FREQUENCY )
+				{
+					index = i;
+					break;
+				}
+	}
+	if( 0 == index )
+		return 0;
+	return sampleRate / index;
 }
 
 
