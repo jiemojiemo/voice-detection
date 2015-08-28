@@ -1,6 +1,7 @@
 #include "voicedetection.h"
 #include <assert.h>
-
+#include <memory>
+#include <fstream>
 
 
 CVoiceDetection::CVoiceDetection()
@@ -57,7 +58,7 @@ void CVoiceDetection::EnFrame( const float* dataIn, int sampleSize, int winSize,
 }
 void CVoiceDetection::CalcZeroCrossRate()
 {
-
+	std::fstream file( "zcr",std::ios::app );
     for( int i = 0; i < m_frameCount; ++i )
 	{
 		int count = 0;
@@ -66,8 +67,10 @@ void CVoiceDetection::CalcZeroCrossRate()
 			if( m_frameData[i][j] * m_frameData[i][j + 1] < 0 && m_frameData[i][j] - m_frameData[i][j + 1] > 0.0002)
 				count++;
 		}
+		file << count << " ";
 		m_zeroCrossRate.push_back( count );
 	}
+	file.close();
 }
 void CVoiceDetection::CalcAmplitude()
 {
@@ -83,45 +86,26 @@ void CVoiceDetection::CalcAmplitude()
 }
 void CVoiceDetection::CalcAmpThreshold()
 {
+	std::unique_ptr<IThresholdCalc> calcThreshold( new CNoiseAverageAmp );
     double ampMax = GetAmplitudesMax();
-    double ampMin = GetAmplitudesMin();
+    m_ampMinThreshold = 5 * calcThreshold->GetAmplitudesMin(m_amplitude, m_zeroCrossRate);
+	std::unique_ptr<IThresholdCalc> calcThresholdMin( new CErgodicFindTheMin );
+	double minAmp = calcThresholdMin->GetAmplitudesMin( m_amplitude, m_zeroCrossRate );
+	 if ( m_ampMinThreshold > ampMax/8.0 )
+		m_ampMinThreshold = minAmp * AMP_MIN_MUL;
     m_ampMaxThreshold = ampMax/8.0;
-	if( fabs(ampMin) < 0.0000001 )
-		ampMin = 0.0001;
-    m_ampMinThreshold = ampMin*AMP_MIN_MUL;
 }
 
 double CVoiceDetection::GetAmplitudesMax()
 {
     double maxAmp = 0.0;
-    for( int i = 0; i < m_frameCount; ++i )
+	for( int i = 0; i < m_amplitude.size(); ++i )
 	{
-		int count = 0;
-		double ampSum = 0;
-		for( int j = 0; j < m_winSize -1; ++j )
-		{
-			ampSum += m_frameData[i][j] * m_frameData[i][j];
-		}
-		if( ampSum > maxAmp )
-			maxAmp = ampSum;
+		if( m_amplitude[i] > maxAmp )
+			maxAmp = m_amplitude[i];
 	}
+	assert( maxAmp > 0.0 );
 	return maxAmp;
-}
-double CVoiceDetection::GetAmplitudesMin()
-{
-    double minAmp = 10000.0;
-    for( int i = 0; i < m_frameCount; ++i )
-	{
-		int count = 0;
-		double ampSum = 0;
-		for( int j = 0; j < m_winSize -1; ++j )
-		{
-			ampSum += m_frameData[i][j] * m_frameData[i][j];
-		}
-		if( ampSum < minAmp )
-			minAmp = ampSum;
-	}
-	return minAmp;
 }
 void CVoiceDetection::StartEndPointDetection()
 {

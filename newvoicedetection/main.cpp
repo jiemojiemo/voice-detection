@@ -14,7 +14,7 @@ using namespace std;
 
 
 
-const char* url = "eeenoise.wav";
+const char* url = "000out_1_16int_44100.wav";
 void WriteResultToFile( const float* buffer, const vector<SpeechSegment>& sgm, int hop );
 vector<Solmization> getMelody();
 void PrintSgm( const vector<SpeechSegment>& sgms );
@@ -24,7 +24,7 @@ int main()
 	CAudioTimeSandPitchS pitch;
 	wav_struct wavhead = wavReader.wavread_head( url );
 	float* buffer = wavReader.wavread_data1( wavhead );
-	int sampleSize = wavhead.data_size/MY_INT16/1;
+	int sampleSize = wavhead.data_size/MY_INT16;
 	int sampleRate = wavhead.frequency;
 	int amdfSize = sampleRate / MIN_VOICE_FREQUENCY * 2;	//取 分析人声频率 的范围
 
@@ -34,10 +34,10 @@ int main()
 	float dest = 260;
 	float scale = 0.0;
 	FILE* file = fopen( "222.raw", "wb" );
-	int melody[] = { C3,C3,G3,G3,A3,A3,G3,F3,F3,E3,E3,D3,D3,C3 };
-	float thythm[] = { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2  };
-	//int melody[] = { C3,D3,E3,C3,C3,D3,E3,C3,E3,F3,G3,E3,F3,G3,G3,A3, G3, F3, E3,C3,G3, A3, G3, F3, E3,C3,D3,G2,C3 };
-	//float thythm[]={ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2,0.5,0.5,0.5,0.5,1, 1, 0.5,0.5,0.5,0.5,1, 1, 1, 1, 2  };
+	//int melody[] = { C3,C3,G3,G3,A3,A3,G3,F3,F3,E3,E3,D3,D3,C3 };
+	//float thythm[] = { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2  };
+	int melody[] = { C3,D3,E3,C3,C3,D3,E3,C3,E3,F3,G3,E3,F3,G3,G3,A3, G3, F3, E3,C3,G3, A3, G3, F3, E3,C3,D3,G2,C3 };
+	float thythm[]={ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2,0.5,0.5,0.5,0.5,1, 1, 0.5,0.5,0.5,0.5,1, 1, 1, 1, 2  };
 	int melodySize=sizeof(melody)/sizeof(melody[0]);
 	PrintSgm( result );
 	for (int i=0; i<melodySize;)

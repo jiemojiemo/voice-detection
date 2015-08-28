@@ -1,5 +1,6 @@
 #ifndef VOICEDETECTION_H_INCLUDED
 #define VOICEDETECTION_H_INCLUDED
+#include "threshold.h"
 #include <map>
 #include <vector>
 using std::map;
@@ -10,7 +11,7 @@ using std::pair;
 #define MAX_VOICE_FREQUENCY 500
 #define MAX(x,y) ( (x)>(y)?(x):(y) )
 #define MIN(x,y) ( (x)<(y)?(x):(y) )
-#define AMP_MIN_MUL 100
+#define AMP_MIN_MUL 30
 
 struct SpeechSegment{
 	int frequence;
@@ -29,7 +30,6 @@ private:
     CVoiceDetection( const CVoiceDetection& ){}
     void operator=( const CVoiceDetection& ){}
 
-	
 	bool IsVoice( double amp, int zcr );
 	bool IsMaybeVoice( double amp, int zcr );
     void CalcZeroCrossRate(  );

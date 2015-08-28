@@ -79,6 +79,7 @@
     <ClInclude Include="CWavread.h" />
     <ClInclude Include="detection.h" />
     <ClInclude Include="pcm2wav.h" />
+    <ClInclude Include="threshold.h" />
     <ClInclude Include="voicedetection.h" />
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +89,7 @@
     <ClCompile Include="detection.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pcm2wav.cpp" />
+    <ClCompile Include="threshold.cpp" />
     <ClCompile Include="voicedetection.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
