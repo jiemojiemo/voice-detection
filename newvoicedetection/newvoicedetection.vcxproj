@@ -74,12 +74,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CAudioTimeSandPitchS.h" />
+    <ClInclude Include="CFFT.h" />
     <ClInclude Include="CWavread.h" />
     <ClInclude Include="detection.h" />
     <ClInclude Include="pcm2wav.h" />
     <ClInclude Include="voicedetection.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CAudioTimeSandPitchS.cpp" />
+    <ClCompile Include="CFFT.cpp" />
     <ClCompile Include="CWavread.cpp" />
     <ClCompile Include="detection.cpp" />
     <ClCompile Include="main.cpp" />

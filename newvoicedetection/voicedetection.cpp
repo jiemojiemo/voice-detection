@@ -1,9 +1,7 @@
 #include "voicedetection.h"
 #include <assert.h>
 
-#define MAX(x,y) ( (x)>(y)?(x):(y) )
-#define MIN(x,y) ( (x)<(y)?(x):(y) )
-#define AMP_MIN_MUL 20
+
 
 CVoiceDetection::CVoiceDetection()
 {
@@ -88,6 +86,8 @@ void CVoiceDetection::CalcAmpThreshold()
     double ampMax = GetAmplitudesMax();
     double ampMin = GetAmplitudesMin();
     m_ampMaxThreshold = ampMax/8.0;
+	if( fabs(ampMin) < 0.0000001 )
+		ampMin = 0.0001;
     m_ampMinThreshold = ampMin*AMP_MIN_MUL;
 }
 
@@ -153,10 +153,13 @@ void CVoiceDetection::StartEndPointDetection()
 				status = 0;
 				voiceCount = 0;
 			}
+
 			break;
 		case 2:
 			if( IsVoice( m_amplitude[i], m_zeroCrossRate[i] ) )
+			{
 				voiceCount++;
+			}
 			else
 			{
 				silenceCount++;
@@ -171,6 +174,7 @@ void CVoiceDetection::StartEndPointDetection()
 				else
 					status = 3;
 			}
+
 			break;
 		case 3:
 			voiceCount = voiceCount - silenceCount/2;
@@ -181,7 +185,9 @@ void CVoiceDetection::StartEndPointDetection()
 			voiceCount = 0;
 			break;
 		}
-	}
+	}//end for
+	if( voiceCount > m_minVoice )
+		m_startEndMap.insert( pair<int,int>( m_frameCount - voiceCount,m_frameCount-1 ) );
 }
 bool CVoiceDetection::IsVoice( double amp, int zcr )
 {
@@ -213,7 +219,8 @@ vector<SpeechSegment> CVoiceDetection::FindSpeechSegment( const float* buffer, i
 		auto voiceFrequence = VoiceFrequenceCalc( amdfResult, sampleRate );
 		if( 0 != voiceFrequence )
 		{
-			SpeechSegment smg(voiceFrequence, it->first, it->second);
+			float beat = float((it->second - it->first)*m_hop)/sampleRate;
+			SpeechSegment smg(voiceFrequence, it->first, it->second, beat);
 			m_speechSegment.push_back( smg );
 		}
 	}
@@ -259,7 +266,7 @@ int CVoiceDetection::VoiceFrequenceCalc( const vector<float>& amdfResult, int sa
 				//人声频率范围 [1000,80]，这个条件过滤那些被误取的噪音	
 				//    F = 1/T
 				//    T = i / sampleRate
-				if( (sampleRate / i) < MAX_VOICE_FREQUENCY && (sampleRate / i) > MIN_VOICE_FREQUENCY )
+				if( (sampleRate / i) < MAX_VOICE_FREQUENCY && (sampleRate / i) > 80 )
 				{
 					index = i;
 					break;

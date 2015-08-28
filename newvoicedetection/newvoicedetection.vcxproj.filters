@@ -27,6 +27,12 @@
     <ClInclude Include="pcm2wav.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CAudioTimeSandPitchS.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CFFT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CWavread.cpp">
@@ -42,6 +48,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pcm2wav.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CAudioTimeSandPitchS.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CFFT.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

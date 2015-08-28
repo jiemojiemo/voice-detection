@@ -7,14 +7,18 @@ using std::vector;
 using std::pair;
 
 #define MIN_VOICE_FREQUENCY 80.0
-#define MAX_VOICE_FREQUENCY 1000.0
+#define MAX_VOICE_FREQUENCY 500
+#define MAX(x,y) ( (x)>(y)?(x):(y) )
+#define MIN(x,y) ( (x)<(y)?(x):(y) )
+#define AMP_MIN_MUL 100
 
 struct SpeechSegment{
 	int frequence;
 	unsigned int start;
 	unsigned int end;
-	SpeechSegment( int fre, int s, int e ):
-	frequence(fre), start(s), end(e)
+	float beat;
+	SpeechSegment( int fre, int s, int e, float b ):
+	frequence(fre), start(s), end(e), beat(b)
 	{
 
 	}
@@ -25,6 +29,7 @@ private:
     CVoiceDetection( const CVoiceDetection& ){}
     void operator=( const CVoiceDetection& ){}
 
+	
 	bool IsVoice( double amp, int zcr );
 	bool IsMaybeVoice( double amp, int zcr );
     void CalcZeroCrossRate(  );
