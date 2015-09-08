@@ -1,6 +1,6 @@
 #ifndef VOICEDETECTION_H_INCLUDED
 #define VOICEDETECTION_H_INCLUDED
-#include "threshold.h"
+#include "calcthreshold.h"
 #include <map>
 #include <vector>
 using std::map;

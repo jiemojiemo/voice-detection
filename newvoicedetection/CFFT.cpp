@@ -12,39 +12,39 @@ void CFFT::conjugate_complex(int n,complex in[],complex out[])
 	}	
 }
 
-void CFFT::c_abs(complex f[],float out[],int n)
+void CFFT::c_abs(complex f[],float out[],int size)
 {
 	int i = 0;
 	float t;
-	for(i=0;i<n;i++)
+	for(i=0;i<size;i++)
 	{
 		t = f[i].real * f[i].real + f[i].imag * f[i].imag;
 		out[i] = sqrt(t);
 	}	
 }
 
-void CFFT::c_plus(complex a,complex b,complex *c)
+void CFFT::c_plus(complex a,complex b,complex *result)
 {
-	c->real = a.real + b.real;
-	c->imag = a.imag + b.imag;
+	result->real = a.real + b.real;
+	result->imag = a.imag + b.imag;
 }
 
-void CFFT::c_sub(complex a,complex b,complex *c)
+void CFFT::c_sub(complex a,complex b,complex *result)
 {
-	c->real = a.real - b.real;
-	c->imag = a.imag - b.imag;	
+	result->real = a.real - b.real;
+	result->imag = a.imag - b.imag;	
 }
 
-void CFFT::c_mul(complex a,complex b,complex *c)
+void CFFT::c_mul(complex a,complex b,complex *result)
 {
-	c->real = a.real * b.real - a.imag * b.imag;
-	c->imag = a.real * b.imag + a.imag * b.real;	
+	result->real = a.real * b.real - a.imag * b.imag;
+	result->imag = a.real * b.imag + a.imag * b.real;	
 }
 
-void CFFT::c_div(complex a,complex b,complex *c)
+void CFFT::c_div(complex a,complex b,complex *result)
 {
-	c->real = (a.real * b.real + a.imag * b.imag)/(b.real * b.real +b.imag * b.imag);
-	c->imag = (a.imag * b.real - a.real * b.imag)/(b.real * b.real +b.imag * b.imag);
+	result->real = (a.real * b.real + a.imag * b.imag)/(b.real * b.real +b.imag * b.imag);
+	result->imag = (a.imag * b.real - a.real * b.imag)/(b.real * b.real +b.imag * b.imag);
 }
 
 #define SWAP(a,b)  tempr=(a);(a)=(b);(b)=tempr
@@ -118,4 +118,25 @@ void CFFT::ifft(int N,complex f[])
 		f[i].imag = (f[i].imag)/N;
 		f[i].real = (f[i].real)/N;
 	}
+}
+
+void CFFT::ifft(int N, float in[])
+{
+	complex *f = new complex[N];
+	for (int i = 0; i < N; i++)
+	{
+		f[i].real = in[i];
+		f[i].imag = 0;
+	}
+	int i = 0;
+	conjugate_complex(N, f, f);
+	fft(N, f);
+	conjugate_complex(N, f, f);
+	for (i = 0; i < N; i++)
+	{
+		f[i].imag = (f[i].imag) / N;
+		f[i].real = (f[i].real) / N;
+		in[i] = f[i].real;
+	}
+
 }

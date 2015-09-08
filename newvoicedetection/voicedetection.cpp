@@ -13,7 +13,7 @@ CVoiceDetection::CVoiceDetection()
 	m_zcMaxThreshold = 10;
 	m_zcMinThreshold = 5;
 
-	m_minSilence = 30;
+	m_minSilence = 50;
 	m_minVoice = 100;
 	m_voiceCount = 0;
 	m_silenceCount = 0;
@@ -86,14 +86,16 @@ void CVoiceDetection::CalcAmplitude()
 }
 void CVoiceDetection::CalcAmpThreshold()
 {
-	std::unique_ptr<IThresholdCalc> calcThreshold( new CNoiseAverageAmp );
-    double ampMax = GetAmplitudesMax();
-    m_ampMinThreshold = 5 * calcThreshold->GetAmplitudesMin(m_amplitude, m_zeroCrossRate);
-	std::unique_ptr<IThresholdCalc> calcThresholdMin( new CErgodicFindTheMin );
-	double minAmp = calcThresholdMin->GetAmplitudesMin( m_amplitude, m_zeroCrossRate );
-	 if ( m_ampMinThreshold > ampMax/8.0 )
-		m_ampMinThreshold = minAmp * AMP_MIN_MUL;
-    m_ampMaxThreshold = ampMax/8.0;
+	//std::unique_ptr<IThresholdCalc> calcThreshold( new CNoiseAverageAmp );
+ //   double ampMax = GetAmplitudesMax();
+ //   m_ampMinThreshold = 5 * calcThreshold->GetAmplitudesMin(m_amplitude, m_zeroCrossRate);
+	//std::unique_ptr<IThresholdCalc> calcThresholdMin( new CErgodicFindTheMin );
+	//double minAmp = calcThresholdMin->GetAmplitudesMin( m_amplitude, m_zeroCrossRate );
+	// if ( m_ampMinThreshold > ampMax/8.0 )
+	//	m_ampMinThreshold = minAmp * AMP_MIN_MUL;
+ //   m_ampMaxThreshold = ampMax/8.0;
+	CThreshodCalculator calc( m_amplitude, m_zeroCrossRate );
+	m_ampMinThreshold = calc.GetThreshold();
 }
 
 double CVoiceDetection::GetAmplitudesMax()

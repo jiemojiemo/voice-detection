@@ -17,13 +17,13 @@ CAudioTimeSandPitchS::~CAudioTimeSandPitchS()
 float* CAudioTimeSandPitchS::WavReadFile(const char* filename)
 {
 	float* PCMOut;
-	wav_struct WAV=m_wavread.wavread_head(filename);
+	wav_struct WAV=m_wavread.ReadHead(filename);
 	m_PCMSize=WAV.data_size/WAV.channel/WAV.sample_num_bit*8;
 //	m_PCMSize=WAV.data_size/WAV.sample_num_bit*8;
 	if (WAV.channel==2)
-		PCMOut=m_wavread.wavread_data2(WAV);
+		PCMOut=m_wavread.ReadStereoData(WAV);
 	else if(WAV.channel==1)
-		PCMOut=m_wavread.wavread_data1(WAV);
+		PCMOut=m_wavread.ReadMonoData(WAV);
 
 	return PCMOut;
 }
@@ -34,7 +34,8 @@ float* CAudioTimeSandPitchS::WavReadBuffer(float* buffer,unsigned long bufferSiz
 	m_PCMSize = bufferSize/channel/32*8;
 	if(channel==1)
 		return buffer;
-	//float* Out=new float[bufferSize/channel];
+	
+	//声道数为2，暂且没有处理
 	if(channel==2)
 	{
 		
@@ -71,19 +72,19 @@ float* CAudioTimeSandPitchS::TimeScaling(float* DataIn,int winSize,int hop,float
 		dataout1 = NULL;
 	}
 	float*		dataout3=ISTFT(dataout2);		
-	//for( int i = 0; i < m_STFTOutRow; ++i )
-	//{
-	//	if( dataout2[i] != NULL )
-	//	{
-	//		delete [] dataout2[i];
-	//		dataout2[i] = NULL;
-	//	}
-	//}
-	//if( dataout2!= NULL )
-	//{
-	//	delete [] dataout2;
-	//	dataout2 = NULL;
-	//}
+	for (int i = 0; i < (m_STFTOutRow - 2) / m_scale; ++i)
+	{
+		if (dataout2[i] != NULL)
+		{
+			delete[] dataout2[i];
+			dataout2[i] = NULL;
+		}
+	}
+	if (dataout2 != NULL)
+	{
+		delete[] dataout2;
+		dataout2 = NULL;
+	}
 	return dataout3;
 
 }
@@ -343,8 +344,11 @@ float* CAudioTimeSandPitchS::resample(float* dataIn, double scale)
 			x2=x1+1;
 			y1=dataIn[x1];
 			y2=dataIn[x2];		
-			dataOut[a++]=(x-x1)*(y2-y1)/(x2-x1)+y1;
+			dataOut[a]=(x-x1)*(y2-y1)/(x2-x1)+y1;
+			if (dataOut[a] > 1 || dataOut[a] < 1)
+				dataOut[a] = 0;
 			x+=1.0/scale;		
+			a++;
 		}		
 	}
 	else

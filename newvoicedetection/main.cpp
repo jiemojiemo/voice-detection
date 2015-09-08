@@ -5,6 +5,7 @@
 #include "CAudioTimeSandPitchS.h"
 #include "CWavread.h"
 #include "pcm2wav.h"
+#include "CPitchShift.h"
 #include <cmath>
 #include <fstream>
 #include <memory>
@@ -14,16 +15,18 @@ using namespace std;
 
 
 
-const char* url = "000out_1_16int_44100.wav";
+const char* url = "iii.wav";
 void WriteResultToFile( const float* buffer, const vector<SpeechSegment>& sgm, int hop );
 vector<Solmization> getMelody();
 void PrintSgm( const vector<SpeechSegment>& sgms );
 int main()
 {
 	CWavread wavReader;
+	
+	CpitchShiftwithHop pitchShifttest;
 	CAudioTimeSandPitchS pitch;
-	wav_struct wavhead = wavReader.wavread_head( url );
-	float* buffer = wavReader.wavread_data1( wavhead );
+	wav_struct wavhead = wavReader.ReadHead( url );
+	float* buffer = wavReader.ReadMonoData( wavhead );
 	int sampleSize = wavhead.data_size/MY_INT16;
 	int sampleRate = wavhead.frequency;
 	int amdfSize = sampleRate / MIN_VOICE_FREQUENCY * 2;	//取 分析人声频率 的范围
@@ -54,8 +57,11 @@ int main()
 			scale = it->beat/thythm[i] * 4;
 			//scale=1;
 			//shift = 1;
-			auto dataReslut(pitch.TimeScalingAndPitchShifting( shift, scale, datain, 1024, 256 ));
-			fwrite( dataReslut, 1, pitch.GetResampleSize(), file );
+			//auto dataReslut(pitch.TimeScalingAndPitchShifting( shift, scale, datain, 1024, 256 ));
+			auto dataReslut1(pitchShifttest.pitchShift(dest, datain, length, 1024));
+			auto dataReslut2 = pitch.WavReadBuffer(dataReslut1, length, 1);
+			auto dataReslut(pitch.TimeScaling(dataReslut2, 1024, 256, scale));
+			fwrite( dataReslut, 1, pitch.GetSize(), file );
 			if( dataReslut != NULL )
 			{
 				delete [] dataReslut;

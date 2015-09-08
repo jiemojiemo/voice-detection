@@ -14,5 +14,4 @@ enum Solmization{
 	bB3 = 233,
 	B3 = 246,
 	C4 = 261,
-
 };
